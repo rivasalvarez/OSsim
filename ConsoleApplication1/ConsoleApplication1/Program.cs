@@ -305,20 +305,21 @@ namespace OSsimulator
 
     class Program
     {
-        static int quantum;
-        static int procTime;
-        static int monTime;
-        static int hdTime;
-        static int prinTime;
-        static int keybTime;
-        static String log;
-        static String procSch;
-        static String filePath;
-        static String memoryType;
+        private static int quantum;
+        private static int procTime;
+        private static int monTime;
+        private static int hdTime;
+        private static int prinTime;
+        private static int keybTime;
+        private static String log;
+        private static String procSch;
+        private static String filePath;
+        private static String memoryType;
 
         static void Main(string[] args)
         {
-            String fileName;
+            string fileName;
+            fileName = args[0];
             clock Clock = new clock();
 
             // Temp Program Holds
@@ -327,10 +328,7 @@ namespace OSsimulator
             // Initialize System
                 // Initialize Classes
                 // Read-in, populate memory, set configuration
-                do{
-                Console.WriteLine("Enter Config file name");
-                fileName = Console.ReadLine();
-                } while( !readInConfig(fileName) );
+                readInConfig(fileName);
                 Clock.setClock(procTime, monTime, hdTime, prinTime, keybTime);
 
             // Run
@@ -392,7 +390,7 @@ namespace OSsimulator
             // Prints message if file not opened;
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("{0} {1}" , e.Message, "\r\n");
                 return false;
             }
         }
