@@ -147,17 +147,21 @@ namespace OSsimulator
 		    // Class Clock
             clock interrClock;
             // Main processor
-            processor Proc;
+            processor Processor;
 
         // Constructors
-        public interruptManager()
+        public interruptManager(ref processor Proc)
         {
             interrClock = new clock();
             int pendingInterrupts = 0;
+            Processor = Proc;
         }
 
         // Methods  
-		    // Create: Adds a new interrupt
+		    // Create: Adds a new interrupt, type:harddrive, monitor, keyboard, printer, etc.
+                // cycles: how many cycles does it need, 
+                // IO: Input or Output
+                // PIDNum: to which PID does it associate with
             public void newInterrupt(string type, int cycles, string IO, int PIDNum)
             {
                 string info;
@@ -165,8 +169,9 @@ namespace OSsimulator
                 pendingInterrupts++;
                 // waits the amount of time it is supposed to
                 interrClock.delay(type, cycles);
-                // notifies the OS
-                info = "Pid" + PIDNum + " - " + IO + ", " + type + "completed " + interrClock.getElapsedTime();
+                // makes a string with the information that needs to be printed
+                info = "Pid" + PIDNum + " - " + IO + ", " + type + "completed ";
+                // notigies the OS
                 service(info);
                 // decrements the amount of pending interrupts
                 pendingInterrupts--;
@@ -176,7 +181,7 @@ namespace OSsimulator
             public void service(string info)
             {
                 // stops processor
-                Program.Proc.manageInterrupt(info);
+                Processor.setInterrupt(info);
             }
     }
 
@@ -192,16 +197,22 @@ namespace OSsimulator
     {
         // Member Fields
 		    // Cycle time
+            int cycleTime;
             // New Queue <Type PCB>
 		    // Ready Queue <Type PCB>
             // Running Queue <Type PCB>
             // Waiting Queue <Type PCB>
 		    // Class::Timer
+            // interrupt flag
+            bool interruptFlag;
+            string interruptInfo;
 
         // Constructors
         public processor()
         {
 
+            interruptFlag = false;
+            interruptInfo = "";
         }
 
         // Methods
@@ -212,9 +223,37 @@ namespace OSsimulator
             // Run(process), prints status to console
             // Enqueue 
             // Manage Interrupt
-            public void manageInterrupt(string info)
+            public void manageInterrupt()
+            {
+                // ...
+
+                // resets flag
+                interruptFlag = false;
+            }
+
+            // sets the processor's interrupt flag, and gets the interrupt information
+            public void setInterrupt(string info)
+            {
+                interruptFlag = true;
+                interruptInfo = info;
+            }
+
+            public void processorRun(int cycles)
             {
 
+                // calculates the number of milliseconds needed to simulate
+                int runTime = cycles * cycleTime;
+
+                // simulates the processing time
+                for (int i = 0; i < runTime; i++)
+                {
+                    // if there is an interrupt it will be managed
+                    if (interruptFlag)
+                        manageInterrupt();
+
+                    // else it sleeps for one ms
+                    Thread.Sleep(1);
+                }
             }
     }
 
@@ -342,7 +381,7 @@ namespace OSsimulator
         private static String procSch;
         private static String filePath;
         private static String memoryType;
-        public static processor Proc;
+        private static processor Proc;
 
         static void Main(string[] args)
         {
